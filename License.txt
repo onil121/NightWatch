@@ -1,0 +1,29 @@
+Proprietary License - All Rights Reserved
+
+Copyright (c) [2026] [Jouw Naam of Studio Naam]
+
+Permission is hereby granted, free of charge, to any person obtaining a copy 
+of this software and associated documentation files (the "Software"), to download, 
+run, and play the Software for personal, non-commercial entertainment purposes only.
+
+This permission is subject to the following strict conditions:
+
+1. PROHIBITED REDISTRIBUTION AND RE-PUBLISHING: You may not publish, distribute, 
+   sub-license, sell, or rent the Software, its source code, or its assets 
+   (including but not limited to artwork, music, and sound effects) under your 
+   own name, a different name, or any studio name.
+   
+2. NO MODIFICATION OR DERIVATIVE WORKS: You may not modify, alter, adapt, 
+   or create derivative works based upon the Software or its source code for 
+   the purpose of public distribution or commercial use.
+
+3. COPYRIGHT NOTICE: The above copyright notice and this permission notice shall 
+   be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

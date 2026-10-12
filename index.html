@@ -1,0 +1,1135 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#008080">
+  <title>Windowz 64 — Retro Desktop</title>
+  <style>
+    :root {
+      --teal: #008080;
+      --face: #c0c0c0;
+      --dark: #808080;
+      --navy: #000080;
+      --ink: #111;
+      --desktop-scale: 1;
+      --cursor-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='32' viewBox='0 0 24 32'%3E%3Cpath d='M2 1v26l6-7 4 10 4-2-4-10h9L2 1z' fill='white' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") 2 1, default;
+      --cursor-hand: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='32' viewBox='0 0 24 32'%3E%3Cpath d='M9 3c-1 0-2 1-2 2v9l-2-2c-2-1-4 1-3 3l5 9c1 2 3 3 5 3h3c4 0 6-2 6-6v-6c0-2-3-2-3 0v-2c0-2-3-2-3 0v-2c0-2-3-2-3 0V5c0-1-1-2-3-2z' fill='white' stroke='black' stroke-width='2' stroke-linejoin='round'/%3E%3C/svg%3E") 8 3, pointer;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { color: var(--ink); font: 12px Tahoma, "MS Sans Serif", Arial, sans-serif; background: #000; cursor: var(--cursor-arrow); }
+    button { color: inherit; font: inherit; cursor: var(--cursor-hand); }
+
+    .boot-screen {
+      position: fixed; z-index: 1000; inset: 0; display: grid; place-items: center;
+      background: #000; color: #ddd; font: 14px Consolas, "Courier New", monospace;
+      transition: opacity .55s ease, visibility .55s ease;
+    }
+    .boot-screen.done { opacity: 0; visibility: hidden; pointer-events: none; }
+    .boot-panel { width: min(560px, 90vw); }
+    .bios-title { color: #fff; font-weight: 700; margin-bottom: 24px; letter-spacing: .04em; }
+    .bios-copy { line-height: 1.8; color: #aaa; min-height: 112px; }
+    .boot-logo { display: flex; align-items: center; gap: 16px; margin: 28px 0 20px; }
+    .boot-mark { width: 44px; height: 44px; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; transform: skewY(-7deg); }
+    .boot-mark i:nth-child(1) { background: #f25022; } .boot-mark i:nth-child(2) { background: #7fba00; }
+    .boot-mark i:nth-child(3) { background: #00a4ef; } .boot-mark i:nth-child(4) { background: #ffb900; }
+    .boot-name { font: 31px Georgia, serif; color: #eee; letter-spacing: -.05em; }
+    .boot-name small { display: block; font: 10px Tahoma, Arial, sans-serif; color: #999; letter-spacing: .2em; margin-top: 4px; }
+    .progress-track { height: 13px; border: 1px solid #777; padding: 2px; }
+    .progress-fill { height: 100%; width: 0; background: repeating-linear-gradient(90deg, #eee 0 12px, transparent 12px 15px); animation: bootload 2.7s .25s steps(14, end) forwards; }
+    .boot-hint { margin-top: 10px; color: #777; font-size: 11px; }
+    @keyframes bootload { to { width: 100%; } }
+
+    .game-intro { position: fixed; z-index: 950; inset: 0; display: none; place-items: center; overflow: auto; padding: 22px; color: #d4e9d3; background: radial-gradient(ellipse at 50% 42%, #15251a 0, #090e0b 42%, #020403 100%); font-family: "Courier New", monospace; }
+    .game-intro.show { display: grid; }
+    .game-intro::before { content: ""; position: fixed; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 3px, #0005 3px 4px); }
+    .intro-frame { position: relative; width: min(760px, 94vw); padding: clamp(20px, 5vw, 42px); border: 2px solid #5b9b65; outline: 1px solid #1e4827; outline-offset: 6px; box-shadow: 0 0 38px #224a2a70, inset 0 0 35px #132117; text-align: center; }
+    .intro-topline { display: flex; justify-content: space-between; gap: 12px; padding-bottom: 10px; border-bottom: 1px solid #385f40; color: #94af94; font-size: 10px; letter-spacing: .12em; }
+    .intro-brand { margin: 23px 0 3px; color: #f4f1dc; font: bold 18px Arial, sans-serif; letter-spacing: .38em; text-shadow: 0 0 14px #b5a65955; }
+    .intro-edition { color: #d3bd72; font-size: 10px; letter-spacing: .23em; }
+    .intro-title { margin: 10px 0 0; color: #a9ffae; font: 900 clamp(46px, 10vw, 82px)/.98 "Courier New", monospace; letter-spacing: -.09em; text-shadow: 0 0 10px #61fa6c80, 3px 3px #24432b; }
+    .intro-subtitle { margin: 12px 0 22px; color: #f0db86; font-size: 12px; letter-spacing: .2em; }
+    .intro-story { max-width: 520px; margin: 0 auto; color: #c2cfbe; font-size: 13px; line-height: 1.8; }
+    .intro-objective { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 19px; margin: 23px 0; color: #9db99e; font-size: 10px; letter-spacing: .08em; }
+    .intro-objective span::before { content: "▸ "; color: #ebd575; }
+    .intro-start { min-width: 210px; margin-top: 8px; padding: 13px 18px; border: 2px solid #bde9b6; background: #24472b; color: #f5ffe9; box-shadow: 0 0 16px #88ff8a40, inset 0 0 0 2px #142b18; font: bold 13px "Courier New", monospace; letter-spacing: .15em; cursor: var(--cursor-hand); }
+    .intro-start:hover { background: #32623b; }
+    .intro-prompt { margin-top: 15px; color: #809580; font-size: 9px; letter-spacing: .17em; animation: prompt-blink 1.1s steps(2, start) infinite; }
+    .intro-bottomline { margin-top: 24px; padding-top: 9px; border-top: 1px solid #385f40; color: #718371; font-size: 9px; letter-spacing: .1em; }
+    @keyframes prompt-blink { to { visibility: hidden; } }
+
+    .desktop { position: fixed; inset: 0 0 30px; overflow: hidden; background-color: var(--teal); }
+    .wallpaper-stamp { position: absolute; bottom: 22px; right: 24px; color: rgba(255,255,255,.38); text-align: right; pointer-events: none; }
+    .wallpaper-stamp strong { display: block; font: bold 22px Georgia, serif; }
+    .wallpaper-stamp span { font-size: 10px; letter-spacing: .12em; }
+    .desktop-icons { position: absolute; inset: 12px auto 12px 10px; display: flex; flex-direction: column; flex-wrap: wrap; align-content: flex-start; gap: 10px 2px; }
+    .desktop-icon { width: 76px; min-height: 76px; padding: 5px 3px; border: 1px solid transparent; background: transparent; color: white; text-shadow: 1px 1px #333; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: var(--cursor-arrow); }
+    .desktop-icon:hover { background: rgba(0,0,128,.35); border: 1px dotted #fff; }
+    .desktop-icon.selected { background: rgba(0,0,128,.6); border: 1px dotted #fff; }
+    .desktop-icon .glyph { font-size: 34px; line-height: 36px; text-shadow: none; filter: drop-shadow(1px 1px 0 #222); }
+    .desktop-icon .label { text-align: center; line-height: 14px; max-width: 72px; }
+
+    .taskbar { position: fixed; z-index: 500; bottom: 0; left: 0; right: 0; height: 30px; display: flex; align-items: center; gap: 4px; padding: 3px; background: var(--face); border-top: 2px solid #fff; box-shadow: inset 0 1px #dfdfdf; }
+    .classic-button { border: 0; border-radius: 0; background: var(--face); box-shadow: inset 1px 1px #fff, inset -1px -1px #404040, inset 2px 2px #dfdfdf, inset -2px -2px #808080; min-height: 23px; padding: 2px 8px; cursor: var(--cursor-hand); }
+    .classic-button:active, .classic-button.pressed { box-shadow: inset 1px 1px #404040, inset -1px -1px #fff, inset 2px 2px #808080, inset -2px -2px #dfdfdf; padding-top: 3px; padding-left: 9px; }
+    .start-button { display: flex; align-items: center; gap: 5px; padding: 2px 8px 2px 5px; font-weight: bold; font-size: 13px; }
+    .mini-logo { width: 16px; height: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 1px; transform: skewY(-8deg); }
+    .mini-logo i:nth-child(1) { background: #f25022; } .mini-logo i:nth-child(2) { background: #7fba00; }
+    .mini-logo i:nth-child(3) { background: #00a4ef; } .mini-logo i:nth-child(4) { background: #ffb900; }
+    .task-divider { height: 22px; border-left: 1px solid #808080; border-right: 1px solid #fff; margin: 0 2px; }
+    .task-items { display: flex; gap: 4px; flex: 1; min-width: 0; }
+    .task-item { min-width: 120px; max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+    .tray { height: 23px; min-width: 104px; display: flex; justify-content: center; align-items: center; gap: 6px; border: 1px solid #808080; box-shadow: inset 1px 1px #404040, inset -1px -1px #fff; padding: 0 7px; }
+    .tray .speaker { font-size: 14px; }
+    .tray .speaker-toggle { min-height: 0; padding: 0; border: 0; background: transparent; box-shadow: none; font-size: 14px; line-height: 1; }
+    .tray .speaker-toggle:active { transform: translateY(1px); }
+
+    .start-menu { display: none; position: fixed; z-index: 600; bottom: 30px; left: 3px; width: 238px; padding: 3px; background: var(--face); box-shadow: 2px 2px 4px #0008, inset 1px 1px #fff, inset -1px -1px #404040; }
+    .start-menu.open { display: flex; }
+    .start-rail { width: 29px; background: linear-gradient(#808080, #c0c0c0); display: flex; align-items: flex-end; padding: 7px 4px; color: white; writing-mode: vertical-rl; transform: rotate(180deg); font-weight: bold; letter-spacing: .07em; font-size: 17px; }
+    .start-rail span { color: #e1e1e1; }
+    .start-list { flex: 1; padding: 3px; }
+    .menu-entry { height: 39px; width: 100%; display: flex; align-items: center; gap: 10px; border: 0; background: transparent; text-align: left; padding: 4px 8px; cursor: pointer; }
+    .menu-entry:hover { background: var(--navy); color: #fff; }
+    .menu-entry .menu-glyph { width: 25px; text-align: center; font-size: 21px; }
+    .menu-rule { border: 0; border-top: 1px solid #808080; border-bottom: 1px solid #fff; margin: 4px 5px; }
+
+    .window { position: absolute; z-index: 20; width: min(440px, calc(100vw - 32px)); min-height: 180px; background: var(--face); box-shadow: 2px 2px 5px #0008, inset 1px 1px #fff, inset -1px -1px #404040; padding: 3px; display: flex; flex-direction: column; }
+    .window.hidden { display: none; }
+    .window.maximized { inset: 3px 3px 3px 3px !important; width: auto !important; height: auto !important; }
+    .titlebar { height: 23px; min-height: 23px; background: linear-gradient(90deg, var(--navy), #1084d0); color: #fff; display: flex; align-items: center; padding: 2px 3px 2px 6px; font-weight: bold; cursor: move; user-select: none; }
+    .title-icon { margin-right: 6px; font-size: 14px; }
+    .window-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .window-controls { display: flex; gap: 2px; }
+    .window-controls button { width: 19px; height: 18px; line-height: 12px; padding: 0; font-weight: bold; }
+    .window-body { flex: 1; min-height: 140px; margin-top: 3px; background: #fff; border: 2px solid; border-color: #808080 #fff #fff #808080; padding: 12px; overflow: auto; }
+    .window-body p { line-height: 1.55; }
+    .window-body h2 { margin: 0 0 10px; font-size: 16px; }
+    .window-body .retro-banner { background: #000080; color: white; padding: 9px; font-weight: bold; }
+    .window-body .status { background: #e7e7e7; border: 1px solid #999; padding: 7px; margin-top: 10px; }
+    .window-body .readme { font-family: "Courier New", monospace; font-size: 12px; }
+    .window-body .display-row { display: flex; gap: 14px; align-items: center; margin: 10px 0; }
+    .fake-monitor { width: 104px; height: 75px; background: #080808; border: 7px ridge #aaa; display: grid; place-items: center; color: #7fba00; font: bold 11px "Courier New", monospace; }
+    .window-body select { font: inherit; }
+    .window-body .ok-row { text-align: right; margin-top: 14px; }
+    .window-body .ok-row button { min-width: 74px; }
+    .window-body .shutdown { display: block; margin: 18px auto; padding: 9px 16px; }
+    .context-menu { position: fixed; z-index: 700; display: none; width: 176px; background: var(--face); padding: 3px; box-shadow: 2px 2px 4px #0008, inset 1px 1px #fff, inset -1px -1px #404040; }
+    .context-menu.open { display: block; }
+    .context-menu button { width: 100%; height: 25px; border: 0; background: transparent; text-align: left; padding: 3px 9px; }
+    .context-menu button:hover { color: #fff; background: var(--navy); }
+    .context-menu hr { border: 0; border-top: 1px solid #888; border-bottom: 1px solid #fff; }
+    .shutdown-screen { position: fixed; z-index: 900; inset: 0; background: #000; color: #ccc; display: none; place-items: center; font: 15px Consolas, monospace; }
+    .shutdown-screen.show { display: grid; }
+    .shutdown-screen button { margin-top: 20px; }
+    #window-cybercam { width: min(850px, calc(100vw - 24px)); min-height: 0; max-height: calc(100vh - 40px); }
+    .cybercam-body { min-height: 0; padding: 0; overflow: auto; background: #d4d4d4; }
+    .cybercam-mode-tabs { display: flex; gap: 3px; padding: 6px 8px 0; background: #c0c0c0; border-bottom: 1px solid #888; }
+    .cybercam-mode-tab { padding: 6px 12px; border: 1px solid #888; border-bottom: 0; background: #aaa; color: #222; font: bold 11px Tahoma, sans-serif; cursor: var(--cursor-hand); }
+    .cybercam-mode-tab.active { position: relative; z-index: 1; background: #101719; color: #a9ffcc; }
+    .cybercam-monitor-mode { padding: 10px; background: #111719; color: #c5d0c9; font-family: "Courier New", monospace; }
+    .cybercam-monitor-mode[hidden], .cybercam-webcam-mode[hidden] { display: none; }
+    .monitor-topline { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 8px; color: #b8c9c0; font-size: 11px; }
+    .monitor-topline strong { color: #a9ffcc; letter-spacing: .08em; }
+    .monitor-indicator { color: #ffd978; font-size: 10px; text-align: right; }
+    .monitor-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; }
+    .monitor-feed { position: relative; display: block; min-width: 0; overflow: hidden; padding: 0; border: 2px solid #46534c; background: #050707; color: #fff; text-align: left; cursor: var(--cursor-hand); }
+    .monitor-feed.active { border-color: #a9ffcc; box-shadow: 0 0 0 1px #a9ffcc; }
+    .monitor-feed img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; filter: saturate(.78) contrast(1.08); }
+    .monitor-feed::after { content: ""; position: absolute; inset: 0 0 24px; pointer-events: none; background: repeating-linear-gradient(transparent 0 3px, #0003 3px 4px); }
+    .monitor-feed-head, .monitor-feed-foot { position: absolute; z-index: 1; left: 0; right: 0; display: flex; justify-content: space-between; gap: 4px; padding: 4px 6px; background: #0009; font: 10px "Courier New", monospace; }
+    .monitor-feed-head { top: 0; }
+    .monitor-feed-foot { bottom: 0; color: #a9ffcc; }
+    .monitor-focus { position: relative; display: grid; place-items: center; min-height: 220px; margin-bottom: 8px; overflow: hidden; border: 2px solid #718078; background: #030505; }
+    .monitor-focus img { display: block; width: auto; height: auto; max-width: 100%; max-height: 420px; object-fit: contain; filter: saturate(.82) contrast(1.08); }
+    .monitor-focus::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 3px, #0002 3px 4px); }
+    .monitor-focus-head, .monitor-focus-foot { position: absolute; z-index: 1; left: 0; right: 0; display: flex; justify-content: space-between; gap: 8px; padding: 6px 9px; background: #000b; font: 11px "Courier New", monospace; }
+    .monitor-focus-head { top: 0; color: #a9ffcc; }
+    .monitor-focus-foot { bottom: 0; color: #ffe18a; }
+    .monitor-footnote { margin: 8px 0 0; color: #a6b4ac; font: 10px/1.4 Tahoma, sans-serif; }
+    .cybercam-webcam-mode { padding: 10px; }
+    .cybercam-preview { position: relative; aspect-ratio: 16 / 9; overflow: hidden; display: grid; place-items: center; color: #7ef9ff; background: radial-gradient(ellipse at center, #17343b 0, #071216 56%, #030607 100%); border: 3px inset #888; font-family: "Courier New", monospace; }
+    .cybercam-preview::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(transparent 0 3px, rgba(0,0,0,.23) 3px 4px); }
+    .cybercam-preview video { display: none; width: 100%; height: 100%; object-fit: cover; }
+    .cybercam-preview.live video { display: block; }
+    .camera-placeholder { position: absolute; z-index: 1; text-align: center; padding: 20px; }
+    .cybercam-preview.live .camera-placeholder { display: none; }
+    .camera-placeholder strong { display: block; font-size: 19px; letter-spacing: .12em; margin-bottom: 8px; }
+    .camera-live-badge { display: none; position: absolute; z-index: 2; top: 10px; left: 10px; color: #fff; background: #a40000; padding: 4px 7px; font: bold 11px Tahoma, sans-serif; letter-spacing: .08em; }
+    .cybercam-preview.live .camera-live-badge { display: block; }
+    .camera-readout { display: flex; justify-content: space-between; gap: 8px; padding: 6px 8px; color: #7ef9ff; background: #10191c; font: 11px "Courier New", monospace; }
+    .camera-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; margin-top: 9px; }
+    .camera-toolbar select { min-height: 24px; font: inherit; }
+    .camera-toolbar .camera-spacer { flex: 1; }
+    .camera-note { margin: 8px 0 0; color: #444; font-size: 11px; }
+    .camera-status.error { color: #9c0000; }
+    .camera-status.recording { color: #a40000; font-weight: bold; }
+    .camera-toolbar .record-button.recording { color: #a40000; }
+    #window-vantex { width: min(680px, calc(100vw - 24px)); min-height: 0; }
+    .vantex-body { padding: 0; background: #10131d; border-color: #555 #fff #fff #555; color: #f5f6fb; font: 13px/1.5 Arial, sans-serif; }
+    .vx-brandbar { display: flex; justify-content: space-between; align-items: center; gap: 14px; padding: 16px 20px 13px; border-bottom: 1px solid #2c3040; }
+    .vx-brand { display: flex; align-items: center; gap: 10px; }
+    .vx-mark { width: 35px; height: 35px; display: grid; place-items: center; color: #fff; background: linear-gradient(145deg, #a35aff, #5631d9); font-weight: 900; font-size: 20px; clip-path: polygon(0 0, 100% 0, 74% 100%, 0 100%); }
+    .vx-wordmark { font-size: 18px; font-weight: 900; letter-spacing: .16em; }
+    .vx-wordmark small { display: block; color: #9a9eb0; font-size: 9px; font-weight: 600; letter-spacing: .19em; }
+    .vx-portal-tag { color: #c4a4ff; border: 1px solid #4a3b70; padding: 4px 8px; font-size: 10px; letter-spacing: .12em; }
+    .vx-tabs { display: flex; gap: 4px; padding: 0 17px; border-bottom: 1px solid #2c3040; }
+    .vx-tab { padding: 10px 11px 8px; color: #a9adbd; border: 0; border-bottom: 2px solid transparent; background: transparent; cursor: var(--cursor-hand); font-weight: 700; }
+    .vx-tab:hover, .vx-tab.active { color: #fff; }
+    .vx-tab.active { border-bottom-color: #9d6bff; }
+    .vx-view { min-height: 360px; padding: 20px; }
+    .vx-view[hidden] { display: none; }
+    .vx-eyebrow { color: #b795ff; font-size: 10px; font-weight: 700; letter-spacing: .17em; }
+    .vx-hero { position: relative; overflow: hidden; padding: 23px; border: 1px solid #37314c; background: radial-gradient(ellipse at 95% 0%, #47317a 0, #211c39 31%, #171a27 77%); }
+    .vx-hero::after { content: "V"; position: absolute; right: 27px; top: -55px; color: #ffffff08; font-size: 240px; font-weight: 900; line-height: 1; pointer-events: none; }
+    .vx-hero h1 { position: relative; z-index: 1; max-width: 430px; margin: 9px 0; font-size: clamp(27px, 5vw, 42px); line-height: 1.08; letter-spacing: -.04em; }
+    .vx-hero p { position: relative; z-index: 1; max-width: 420px; color: #bdc0ce; margin: 0 0 17px; }
+    .vx-action { position: relative; z-index: 1; padding: 9px 13px; border: 1px solid #b99aff; background: #8c56ef; color: white; cursor: var(--cursor-hand); font-weight: 700; }
+    .vx-action:hover { background: #a373ff; }
+    .vx-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin: 11px 0 18px; }
+    .vx-stat { padding: 10px 12px; border: 1px solid #2d3140; background: #181c29; }
+    .vx-stat strong { display: block; font-size: 17px; }
+    .vx-stat span { color: #a4a8b8; font-size: 10px; letter-spacing: .08em; }
+    .vx-section-heading { margin: 0 0 9px; font-size: 14px; }
+    .vx-card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+    .vx-card { min-height: 108px; padding: 12px; border: 1px solid #2d3140; background: #181c29; }
+    .vx-card-icon { color: #b795ff; font-size: 19px; }
+    .vx-card h3 { margin: 4px 0 3px; font-size: 12px; }
+    .vx-card p { margin: 0; color: #a4a8b8; font-size: 11px; }
+    .vx-page-title { margin: 5px 0 6px; font-size: 27px; letter-spacing: -.03em; }
+    .vx-muted { color: #b3b6c4; }
+    .vx-product-list { display: grid; gap: 9px; margin-top: 15px; }
+    .vx-product { display: flex; gap: 12px; align-items: flex-start; padding: 13px; border: 1px solid #303444; background: #181c29; }
+    .vx-product .vx-card-icon { min-width: 28px; }
+    .vx-product h3 { margin: 0 0 3px; font-size: 14px; }
+    .vx-product p { margin: 0; color: #b3b6c4; }
+    .vx-contact-form { display: grid; gap: 10px; max-width: 470px; margin-top: 13px; }
+    .vx-contact-form label { display: grid; gap: 4px; color: #c9cada; font-size: 11px; }
+    .vx-contact-form input, .vx-contact-form textarea { width: 100%; padding: 9px; border: 1px solid #44495c; background: #171a26; color: white; font: 13px Arial, sans-serif; }
+    .vx-contact-form textarea { min-height: 68px; resize: vertical; }
+    .vx-contact-form input:focus, .vx-contact-form textarea:focus { outline: 2px solid #9d6bff; outline-offset: 1px; }
+    .vx-form-status { min-height: 19px; margin: 0; color: #a7f0c0; }
+    .vx-footer { display: flex; justify-content: space-between; gap: 8px; padding: 8px 20px; border-top: 1px solid #2c3040; color: #858a9d; font-size: 10px; }
+    .vx-workload-card { padding: 14px; border: 1px solid #4b3c66; background: linear-gradient(120deg, #211b31, #181c29); }
+    .vx-workload-card h2 { margin: 6px 0; font-size: 19px; }
+    .vx-workload-card p { max-width: 500px; margin: 0 0 12px; color: #b9bbca; }
+    .vx-workload-heading { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 17px 0 8px; }
+    .vx-workload-heading h3 { margin: 0; font-size: 13px; }
+    .vx-workload-count { color: #bd9dff; font-size: 10px; }
+    .vx-workload-list { display: grid; gap: 5px; }
+    .vx-workload-row { display: flex; justify-content: space-between; gap: 10px; padding: 8px 10px; border: 1px solid #2d3140; background: #181c29; color: #bec1ce; font-size: 11px; }
+    .vx-workload-state { color: #ffd978; text-align: right; }
+    .vx-workload-state.safe { color: #a7f0c0; }
+    .vx-workload-state.active { color: #ff9d9d; }
+    #window-cybercheck { width: min(800px, calc(100vw - 24px)); min-height: 0; max-height: calc(100vh - 40px); }
+    .cybercheck-body { min-height: 0; padding: 12px; overflow: auto; background: #d1d1d1; }
+    .cybercheck-banner { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; color: #d8ffe6; background: #14221a; font: 11px "Courier New", monospace; }
+    .cybercheck-banner strong { color: #a9ffcc; letter-spacing: .12em; }
+    .cybercheck-notice { margin: 8px 0; padding: 7px 9px; border: 1px solid #9b8645; background: #fff5cf; color: #514419; font-size: 11px; }
+    .cybercheck-layout { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 10px; }
+    .cybercheck-main { min-width: 0; padding: 8px; background: #111719; color: #e5eee8; }
+    .cybercheck-image-frame { position: relative; display: grid; place-items: center; min-height: 200px; overflow: hidden; border: 2px solid #45534a; background: #030505; }
+    .cybercheck-image-frame img { display: block; width: auto; height: auto; max-width: 100%; max-height: 330px; object-fit: contain; }
+    .cybercheck-image-label { position: absolute; top: 0; left: 0; right: 0; padding: 6px 8px; background: #000b; color: #a9ffcc; font: 11px "Courier New", monospace; }
+    .cybercheck-current-status { margin: 8px 0; padding: 8px; border: 1px solid #46534c; color: #ffe18a; background: #20251f; font: bold 12px "Courier New", monospace; }
+    .cybercheck-current-status.safe { color: #a9ffcc; }
+    .cybercheck-current-status.active { color: #ff9d9d; }
+    .cybercheck-actions { display: flex; flex-wrap: wrap; gap: 7px; }
+    .cybercheck-actions button { min-width: 100px; font-weight: bold; }
+    .cybercheck-actions .safe-action { color: #075d2b; }
+    .cybercheck-actions .active-action { color: #8b1010; }
+    .cybercheck-submit-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 8px; padding-top: 8px; border-top: 1px solid #46534c; }
+    .cybercheck-submit-row button { font-weight: bold; }
+    .cybercheck-submit-row button:disabled { color: #777; cursor: not-allowed; }
+    .cybercheck-submit-status { margin: 0; color: #b6c2ba; font: 10px/1.4 Tahoma, sans-serif; }
+    .cybercheck-submit-status.complete { color: #075d2b; font-weight: bold; }
+    .vx-task-state { color: #ffd978; font-size: 10px; letter-spacing: .08em; }
+    .vx-task-state.complete { color: #a7f0c0; }
+    .vx-no-tasks { display: none; margin: 12px 0 0; padding: 10px 12px; border: 1px solid #366448; background: #17271e; color: #a7f0c0; font-weight: bold; }
+    .vx-no-tasks.show { display: block; }
+    .cybercheck-cameras { display: grid; align-content: start; gap: 5px; }
+    .cybercheck-camera { display: flex; justify-content: space-between; gap: 6px; padding: 7px 8px; border: 1px solid #999; background: #e7e7e7; text-align: left; font-size: 10px; }
+    .cybercheck-camera.selected { outline: 1px dotted #000080; background: #d8e7ff; }
+    .cybercheck-camera-state { font-weight: bold; }
+    .cybercheck-camera-state.safe { color: #075d2b; }
+    .cybercheck-camera-state.active { color: #8b1010; }
+    .cybercheck-log { max-height: 96px; overflow: auto; margin-top: 9px; padding: 8px; border: 1px solid #aaa; background: #f3f3f3; color: #333; font: 10px/1.5 "Courier New", monospace; }
+    #window-network { width: min(700px, calc(100vw - 24px)); min-height: 0; }
+    #window-network .window-body { min-height: 430px; padding: 0; border-color: #999 #fff #fff #999; }
+    .search-page { min-height: 426px; display: flex; flex-direction: column; color: #222; background: #fff; font: 13px Arial, sans-serif; }
+    .search-topline { min-height: 36px; display: flex; align-items: center; gap: 16px; padding: 0 15px; border-bottom: 1px solid #eee; color: #555; font-size: 12px; }
+    .search-topline strong { color: #1a73e8; border-bottom: 2px solid #1a73e8; padding: 10px 0 8px; }
+    .search-center { width: min(520px, calc(100% - 36px)); margin: 51px auto 32px; text-align: center; }
+    .search-wordmark { margin-bottom: 22px; font: bold 53px/1 Georgia, "Times New Roman", serif; letter-spacing: -4px; }
+    .search-wordmark .s-blue { color: #4285f4; } .search-wordmark .s-red { color: #ea4335; }
+    .search-wordmark .s-yellow { color: #fbbc05; } .search-wordmark .s-green { color: #34a853; }
+    .search-wordmark .s-tag { display: block; margin: 8px 0 0; color: #777; font: 10px Arial, sans-serif; letter-spacing: .17em; }
+    .search-form { margin: 0 auto; }
+    .search-box { display: flex; align-items: center; gap: 8px; height: 38px; padding: 0 10px; border: 1px solid #aaa; border-radius: 2px; box-shadow: inset 0 1px 2px #0002; text-align: left; }
+    .search-box:focus-within { border-color: #4285f4; box-shadow: 0 1px 4px #0003; }
+    .search-glass { color: #777; font-size: 18px; }
+    .search-box input { width: 100%; border: 0; outline: 0; color: #222; font: 15px Arial, sans-serif; }
+    .search-actions { display: flex; justify-content: center; gap: 8px; margin-top: 18px; }
+    .search-actions .classic-button { min-height: 29px; padding: 3px 12px; color: #444; font: 12px Arial, sans-serif; }
+    .search-hint { margin-top: 23px; color: #666; font-size: 11px; }
+    .search-hint button { padding: 0; border: 0; background: transparent; color: #1a0dab; text-decoration: underline; font: inherit; }
+    .search-message { min-height: 17px; margin: 10px 0 0; color: #666; font-size: 11px; }
+    .search-results { width: min(540px, calc(100% - 36px)); margin: 0 auto 24px; }
+    .search-results[hidden] { display: none; }
+    .search-results-heading { padding: 0 0 9px; border-bottom: 1px solid #ddd; color: #666; font-size: 11px; }
+    .search-result { padding: 12px 0 3px; }
+    .search-result-link { padding: 0; border: 0; background: none; color: #1a0dab; text-align: left; text-decoration: underline; font: 18px Arial, sans-serif; }
+    .search-result-url { margin: 3px 0; color: #08752e; font-size: 11px; }
+    .search-result p { margin: 2px 0; color: #444; font-size: 12px; line-height: 1.45; }
+    .search-no-results { padding: 16px 0; color: #444; line-height: 1.6; }
+    .search-footer { display: flex; justify-content: space-between; gap: 10px; margin-top: auto; padding: 9px 14px; border-top: 1px solid #ddd; background: #f2f2f2; color: #666; font-size: 11px; }
+    .search-topline[hidden], .search-center[hidden], .search-results[hidden], .search-footer[hidden], .search-site-view[hidden] { display: none; }
+    .vantex-site-preview { min-height: 426px; display: flex; flex-direction: column; color: #f5f4fa; background: radial-gradient(ellipse at 77% 14%, #342454 0, #171321 35%, #101016 78%); font: 13px/1.55 Arial, sans-serif; }
+    .vantex-site-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 18px 24px; border-bottom: 1px solid #ffffff20; }
+    .vantex-site-brand { font-size: 19px; font-weight: 900; letter-spacing: .2em; }
+    .vantex-site-brand span { color: #b58bff; }
+    .vantex-site-preview-label { color: #b8a5d9; font-size: 10px; letter-spacing: .14em; }
+    .vantex-site-back { padding: 5px 8px; border: 1px solid #665580; background: transparent; color: #e4d7ff; font: 11px Arial, sans-serif; cursor: var(--cursor-hand); }
+    .vantex-site-hero { width: min(560px, calc(100% - 40px)); margin: auto; padding: 56px 0; }
+    .vantex-site-hero .vx-eyebrow { color: #bd9dff; }
+    .vantex-site-hero h1 { max-width: 520px; margin: 12px 0; font-size: clamp(34px, 7vw, 58px); line-height: 1.02; letter-spacing: -.055em; }
+    .vantex-site-hero p { max-width: 450px; margin: 0; color: #c3bfce; font-size: 15px; }
+    .vantex-site-coming { display: inline-block; margin-top: 26px; padding: 7px 10px; border: 1px solid #60498a; color: #d4c3f6; font-size: 10px; letter-spacing: .13em; }
+    .vantex-site-footer { padding: 12px 24px; border-top: 1px solid #ffffff20; color: #908a9d; font-size: 10px; letter-spacing: .06em; }
+
+    @media (max-width: 520px) {
+      .task-item { min-width: 72px; }
+      .tray { min-width: 82px; gap: 3px; padding: 0 4px; }
+      .wallpaper-stamp { right: 14px; bottom: 18px; }
+      .window { max-height: calc(100vh - 60px); }
+      #window-cybercam { left: 8px !important; top: 8px !important; }
+      .camera-toolbar .camera-spacer { display: none; }
+      .monitor-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .monitor-topline { align-items: flex-start; }
+      .monitor-focus img { max-height: 300px; }
+      #window-vantex { left: 8px !important; top: 8px !important; }
+      .vx-view { padding: 13px; }
+      .vx-brandbar { padding: 12px; }
+      .vx-card-grid { grid-template-columns: 1fr; }
+      .vx-card { min-height: 0; }
+      .vx-tabs { padding: 0 5px; }
+      .vx-tab { padding-left: 8px; padding-right: 8px; }
+      #window-cybercheck { left: 8px !important; top: 8px !important; }
+      .cybercheck-layout { grid-template-columns: 1fr; }
+      .cybercheck-cameras { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #window-network { left: 8px !important; top: 8px !important; }
+      #window-network .window-body { min-height: min(430px, calc(100vh - 95px)); }
+      .search-page { min-height: min(426px, calc(100vh - 99px)); }
+      .search-center { margin-top: 36px; }
+      .vantex-site-preview { min-height: min(426px, calc(100vh - 99px)); }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <section class="boot-screen" id="bootScreen" aria-label="System booting">
+    <div class="boot-panel">
+      <div class="bios-title">OLDPC SYSTEMS — BASIC INPUT / OUTPUT SYSTEM</div>
+      <div class="bios-copy" id="biosCopy">Award Modular BIOS v4.51PG<br>Copyright (C) 1984-1998, OldPC Systems<br><br>CPU: RetroCore 6400 @ 64 MHz<br>Memory Test: 65536K OK<br>Detecting IDE drives...</div>
+      <div class="boot-logo"><div class="boot-mark"><i></i><i></i><i></i><i></i></div><div class="boot-name">Windowz 64<small>PERSONAL COMPUTER OPERATING SYSTEM</small></div></div>
+      <div class="progress-track"><div class="progress-fill"></div></div>
+      <div class="boot-hint" id="bootHint">Starting your computer...</div>
+    </div>
+  </section>
+
+  <section class="game-intro" id="gameIntro" aria-label="VANTEX Night Watch introduction" aria-hidden="true">
+    <div class="intro-frame">
+      <div class="intro-topline"><span>VANTEX COMPUTER SYSTEMS</span><span>SECURITY DIVISION · 1987</span></div>
+      <div class="intro-brand">VANTEX PRESENTS</div>
+      <div class="intro-edition">A WINDOWZ 64 NIGHT-SHIFT ADVENTURE</div>
+      <h1 class="intro-title">NIGHT WATCH</h1>
+      <p class="intro-subtitle">THE AFTER-HOURS CAMERA REVIEW</p>
+      <p class="intro-story">The office is quiet. Five camera images are waiting for review. Check each feed, mark it <b>SAFE</b> or <b>ACTIVE</b>, then submit your shift report.</p>
+      <div class="intro-objective"><span>REVIEW 5 FEEDS</span><span>FILE YOUR REPORT</span><span>NO OTHER TASKS</span></div>
+      <button class="intro-start" id="beginShiftButton" type="button">▶ &nbsp; BEGIN SHIFT</button>
+      <div class="intro-prompt">PRESS ENTER OR CLICK TO START</div>
+      <div class="intro-bottomline">A FICTIONAL DEMO · LOCAL IMAGE FEEDS · VANTEX 1987</div>
+    </div>
+  </section>
+
+  <main class="desktop" id="desktop" aria-label="Desktop">
+    <div class="desktop-icons">
+      <button class="desktop-icon" data-open="computer"><span class="glyph">🖥️</span><span class="label">My Computer</span></button>
+      <button class="desktop-icon" data-open="files"><span class="glyph">📁</span><span class="label">My Documents</span></button>
+      <button class="desktop-icon" data-open="network"><span class="glyph">🌐</span><span class="label">Search</span></button>
+      <button class="desktop-icon" data-open="readme"><span class="glyph">📝</span><span class="label">Read Me</span></button>
+      <button class="desktop-icon" data-open="recycle"><span class="glyph">🗑️</span><span class="label">Recycle Bin</span></button>
+      <button class="desktop-icon" data-open="cybercam"><span class="glyph">📹</span><span class="label">Cybercam</span></button>
+      <button class="desktop-icon" data-open="cybercheck"><span class="glyph">🛡️</span><span class="label">Cybercheck</span></button>
+      <button class="desktop-icon" data-open="vantex"><span class="glyph">🟣</span><span class="label">VANTEX Hub</span></button>
+    </div>
+    <div class="wallpaper-stamp"><strong>Windowz 64</strong><span>IT'S YOUR COMPUTER. AGAIN.</span></div>
+
+    <section class="window" id="window-computer" data-title="My Computer" style="left:24%;top:16%;">
+      <header class="titlebar"><span class="title-icon">🖥️</span><span class="window-title">My Computer</span><span class="window-controls"><button class="classic-button minimize" aria-label="Minimize">_</button><button class="classic-button maximize" aria-label="Maximize">□</button><button class="classic-button close" aria-label="Close">×</button></span></header>
+      <div class="window-body"><h2>My Computer</h2><div class="retro-banner">Welcome to your personal computer.</div><p>Choose a drive to explore:</p><p>💾 <u>(A:)</u> 3½ Floppy &nbsp;&nbsp; 🖴 <u>(C:)</u> Local Disk</p><p>💿 <u>(D:)</u> CD-ROM &nbsp;&nbsp; 🖨️ Printers</p><div class="status">4 objects · 64-bit retro edition</div></div>
+    </section>
+
+    <section class="window hidden" id="window-files" data-title="My Documents" style="left:31%;top:20%;">
+      <header class="titlebar"><span class="title-icon">📁</span><span class="window-title">My Documents</span><span class="window-controls"><button class="classic-button minimize" aria-label="Minimize">_</button><button class="classic-button maximize" aria-label="Maximize">□</button><button class="classic-button close" aria-label="Close">×</button></span></header>
+      <div class="window-body"><h2>My Documents</h2><p>📄 <u>Important Stuff.txt</u></p><p>🖼️ <u>vacation_1998.bmp</u></p><p>🎵 <u>dialup_connection.mid</u></p><div class="status">3 items · 1.44 MB free (probably)</div></div>
+    </section>
+
+    <section class="window hidden" id="window-network" data-title="Search" style="left:calc(50% - 350px);top:12%;">
+      <header class="titlebar"><span class="title-icon">🌐</span><span class="window-title">Search — The Internet</span><span class="window-controls"><button class="classic-button minimize" aria-label="Minimize">_</button><button class="classic-button maximize" aria-label="Maximize">□</button><button class="classic-button close" aria-label="Close">×</button></span></header>
+      <div class="window-body">
+        <div class="search-page">
+          <div class="search-topline"><strong>Web</strong><span>Images</span><span>News</span><span>About Search</span></div>
+          <div class="search-center">
+            <div class="search-wordmark" aria-label="Search"><span class="s-blue">S</span><span class="s-red">e</span><span class="s-yellow">a</span><span class="s-blue">r</span><span class="s-green">c</span><span class="s-red">h</span><span class="s-tag">THE WORLD WIDE WEB</span></div>
+            <form class="search-form" id="webSearchForm">
+              <label class="search-box"><span class="search-glass">⌕</span><input id="searchInput" type="search" aria-label="Search the web" autocomplete="off" autofocus></label>
+              <div class="search-actions"><button class="classic-button" type="submit">Search</button><button class="classic-button" type="button" id="luckySearch">Surprise me</button></div>
+            </form>
+            <p class="search-hint">Try a local demo search: <button type="button" data-search-query="VANTEX">VANTEX</button> · <button type="button" data-search-query="Cybercam">Cybercam</button> · <button type="button" data-search-query="computer">computer</button></p>
+            <p class="search-message" id="searchMessage" aria-live="polite">A simpler way to find your way around.</p>
+          </div>
+          <div class="search-results" id="searchResults" hidden></div>
+          <section class="vantex-site-preview search-site-view" id="searchVantexSite" hidden>
+            <header class="vantex-site-nav"><div class="vantex-site-brand"><span>V</span>ANTEX</div><span class="vantex-site-preview-label">WEBSITE PREVIEW</span><button class="vantex-site-back" type="button" id="vantexSiteBack">← Back to results</button></header>
+            <main class="vantex-site-hero"><span class="vx-eyebrow">A VANTEX COMPANY PAGE</span><h1>A new world is taking shape.</h1><p>This is the placeholder for the VANTEX website. We’ll decide what belongs here later.</p><span class="vantex-site-coming">WEBSITE CONTENT COMING SOON</span></main>
+            <footer class="vantex-site-footer">VANTEX · PREVIEW PAGE · READY FOR YOUR IDEAS</footer>
+          </section>
+          <footer class="search-footer"><span>Search · Retro Web Portal</span><span>Local demo index · 1998–forever</span></footer>
+        </div>
+      </div>
+    </section>
+
+    <section class="window hidden" id="window-readme" data-title="Read Me — Notepad" style="left:35%;top:22%;">
+      <header class="titlebar"><span class="title-icon">📝</span><span class="window-title">Read Me — Notepad</span><span class="window-controls"><button class="classic-button minimize" aria-label="Minimize">_</button><button class="classic-button maximize" aria-label="Maximize">□</button><button class="classic-button close" aria-label="Close">×</button></span></header>
+      <div class="window-body readme"><b>WINDOWZ 64 — README.TXT</b><hr><p>Thanks for turning on this very important computer.</p><p>Tip: Click the desktop icons. Drag windows by their blue title bars. The Start menu is where all the magic happens.</p><p>Remember to save your work. And be kind to your hard drive.</p><p>— Your friends at OldPC Systems</p></div>
+    </section>
+
+    <section class="window hidden" id="window-recycle" data-title="Recycle Bin" style="left:38%;top:24%;">
+      <header class="titlebar"><span class="title-icon">🗑️</span><span class="window-title">Recycle Bin</span><span class="window-controls"><button class="classic-button minimize" aria-label="Minimize">_</button><button class="classic-button maximize" aria-label="Maximize">□</button><button class="classic-button close" aria-label="Close">×</button></span></header>
+      <div class="window-body"><h2>Recycle Bin</h2><p>The bin is empty.</p><div class="status">0 objects</div></div>
+    </section>
+
+    <section class="window hidden" id="window-settings" data-title="Display Properties" style="left:30%;top:17%;">
+      <header class="titlebar"><span class="title-icon">🎨</span><span class="window-title">Display Properties</span><span class="window-controls"><button class="classic-button minimize" aria-label="Minimize">_</button><button class="classic-button maximize" aria-label="Maximize">□</button><button class="classic-button close" aria-label="Close">×</button></span></header>
+      <div class="window-body"><h2>Display Properties</h2><div class="display-row"><div class="fake-monitor">HELLO, 1998</div><div><label for="wallpaper">Desktop color:</label><br><select id="wallpaper"><option value="#008080">Classic Teal</option><option value="#000080">Deep Blue</option><option value="#38704a">Forest Green</option><option value="#542e6b">Plum</option><option value="#667788">Storm Gray</option></select></div></div><p>Appearance: High Contrast Nostalgia</p><div class="ok-row"><button class="classic-button close-settings">OK</button></div></div>
+    </section>
+
+    <section class="window hidden" id="window-cybercam" data-title="Cybercam Monitoring" style="left:calc(50% - 425px);top:7%;">
+      <header class="titlebar"><span class="title-icon">📹</span><span class="window-title">Cybercam 64 — Site Monitoring System</span><span class="window-controls"><button class="classic-button minimize" aria-label="Minimize">_</button><button class="classic-button maximize" aria-label="Maximize">□</button><button class="classic-button close" aria-label="Close">×</button></span></header>
+      <div class="window-body cybercam-body">
+        <div class="cybercam-mode-tabs" role="tablist" aria-label="Cybercam modes">
+          <button class="cybercam-mode-tab active" id="monitorModeTab" type="button" role="tab" aria-selected="true">Site monitors</button>
+          <button class="cybercam-mode-tab" id="webcamModeTab" type="button" role="tab" aria-selected="false">Webcam studio</button>
+        </div>
+        <section class="cybercam-monitor-mode" id="cybercamMonitorMode" role="tabpanel" aria-labelledby="monitorModeTab">
+          <div class="monitor-topline"><strong>VANTEX SITE MONITORS · 5 FEEDS</strong><span class="monitor-indicator">STATIC IMAGE DEMO · NOT LIVE CCTV</span></div>
+          <div class="monitor-focus">
+            <img id="monitorFocusImage" src="img/reception.jpg" alt="Reception camera still image">
+            <div class="monitor-focus-head"><span id="monitorFocusName">CAM 01 · RECEPTION</span><span>LOCAL CAM</span></div>
+            <div class="monitor-focus-foot"><span>◉ SIMULATED CAM 1987</span><span id="monitorFocusTime">--:--:--</span></div>
+          </div>
+          <div class="monitor-grid" aria-label="Select a monitor image">
+            <button class="monitor-feed active" type="button" data-camera-name="CAM 01 · RECEPTION" data-camera-image="img/reception.jpg"><img src="img/reception.jpg" alt="Reception camera still"><span class="monitor-feed-head"><span>CAM 01</span><span>IMG</span></span><span class="monitor-feed-foot">RECEPTION · STILL</span></button>
+            <button class="monitor-feed" type="button" data-camera-name="CAM 02 · EXTERIOR" data-camera-image="img/Outside.jpg"><img src="img/Outside.jpg" alt="Exterior camera still"><span class="monitor-feed-head"><span>CAM 02</span><span>IMG</span></span><span class="monitor-feed-foot">EXTERIOR · STILL</span></button>
+            <button class="monitor-feed" type="button" data-camera-name="CAM 03 · KITCHEN" data-camera-image="img/kitchen.jpg"><img src="img/kitchen.jpg" alt="Kitchen camera still"><span class="monitor-feed-head"><span>CAM 03</span><span>IMG</span></span><span class="monitor-feed-foot">KITCHEN · STILL</span></button>
+            <button class="monitor-feed" type="button" data-camera-name="CAM 04 · HALLWAY" data-camera-image="img/hall.jpg"><img src="img/hall.jpg" alt="Hallway camera still"><span class="monitor-feed-head"><span>CAM 04</span><span>IMG</span></span><span class="monitor-feed-foot">HALLWAY · STILL</span></button>
+            <button class="monitor-feed" type="button" data-camera-name="CAM 05 · OFFICE FLOOR" data-camera-image="img/desk.jpg"><img src="img/desk.jpg" alt="Office floor camera still"><span class="monitor-feed-head"><span>CAM 05</span><span>IMG</span></span><span class="monitor-feed-foot">OFFICE FLOOR · STILL</span></button>
+          </div>
+        </div>
+        <section class="cybercam-webcam-mode" id="cybercamWebcamMode" role="tabpanel" aria-labelledby="webcamModeTab" hidden>
+          <div class="cybercam-preview" id="cybercamPreview">
+            <video id="cybercamVideo" autoplay muted playsinline></video>
+            <div class="camera-placeholder"><strong>CYBERCAM 64</strong><span>YOUR EYES ONLY · LOCAL CAMERA STUDIO</span></div>
+            <span class="camera-live-badge">● LIVE</span>
+          </div>
+          <div class="camera-readout"><span id="cameraStatus" class="camera-status">CAMERA OFFLINE</span><span id="cameraResolution">NO SIGNAL</span></div>
+          <div class="camera-toolbar">
+            <button class="classic-button" id="cameraToggle">Start camera</button>
+            <button class="classic-button" id="captureButton" disabled>📷 Take photo</button>
+            <button class="classic-button record-button" id="recordButton" disabled>● Record</button>
+            <span class="camera-spacer"></span>
+            <label for="cameraFilter">Filter</label>
+            <select id="cameraFilter"><option value="none">Original</option><option value="grayscale(1) contrast(1.2)">Noir</option><option value="hue-rotate(75deg) saturate(1.7) contrast(1.15)">Night vision</option><option value="sepia(.75) contrast(1.1)">Vintage</option></select>
+          </div>
+          <p class="camera-note">Nothing is uploaded. The webcam is separate from the static site monitor images.</p>
+        </section>
+      </div>
+    </section>
+
+    <section class="window hidden" id="window-cybercheck" data-title="Cybercheck" style="left:calc(50% - 400px);top:8%;">
+      <header class="titlebar"><span class="title-icon">🛡️</span><span class="window-title">VANTEX Cybercheck — Entity Review</span><span class="window-controls"><button class="classic-button minimize" aria-label="Minimize">_</button><button class="classic-button maximize" aria-label="Maximize">□</button><button class="classic-button close" aria-label="Close">×</button></span></header>
+      <div class="window-body cybercheck-body">
+        <div class="cybercheck-banner"><strong>VANTEX · CYBERCHECK 1987</strong><span>MANUAL CAMERA REVIEW</span></div>
+        <div class="cybercheck-notice">Demo review only: these are static images, not live cameras. “Safe” and “Active” are labels you choose; the app does not detect entities.</div>
+        <div class="cybercheck-layout">
+          <section class="cybercheck-main" aria-label="Selected camera review">
+            <div class="cybercheck-image-frame"><img id="cybercheckImage" src="img/reception.jpg" alt="Reception still image"><span class="cybercheck-image-label" id="cybercheckCameraName">CAM 01 · RECEPTION</span></div>
+            <div class="cybercheck-current-status" id="cybercheckCurrentStatus" aria-live="polite">REVIEW STATUS: UNREVIEWED</div>
+            <div class="cybercheck-actions"><button class="classic-button safe-action" id="markSafeButton" type="button">Safe</button><button class="classic-button active-action" id="markActiveButton" type="button">Active</button></div>
+            <div class="cybercheck-submit-row"><button class="classic-button" id="sendResultsButton" type="button" disabled>Send to server</button><p class="cybercheck-submit-status" id="cybercheckSubmitStatus" aria-live="polite">Review all 5 cameras to enable submission.</p></div>
+            <div class="cybercheck-log" id="cybercheckLog" aria-live="polite">Review log ready. Select a camera image and mark its status.</div>
+          </section>
+          <div class="cybercheck-cameras" id="cybercheckCameraList" aria-label="Choose camera">
+            <button class="classic-button cybercheck-camera selected" type="button" data-camera-index="0"><span>01 · Reception</span><span class="cybercheck-camera-state">UNREVIEWED</span></button>
+            <button class="classic-button cybercheck-camera" type="button" data-camera-index="1"><span>02 · Exterior</span><span class="cybercheck-camera-state">UNREVIEWED</span></button>
+            <button class="classic-button cybercheck-camera" type="button" data-camera-index="2"><span>03 · Kitchen</span><span class="cybercheck-camera-state">UNREVIEWED</span></button>
+            <button class="classic-button cybercheck-camera" type="button" data-camera-index="3"><span>04 · Hallway</span><span class="cybercheck-camera-state">UNREVIEWED</span></button>
+            <button class="classic-button cybercheck-camera" type="button" data-camera-index="4"><span>05 · Office floor</span><span class="cybercheck-camera-state">UNREVIEWED</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="window hidden" id="window-vantex" data-title="VANTEX Hub" style="left:calc(50% - 340px);top:7%;">
+      <header class="titlebar"><span class="title-icon">🟣</span><span class="window-title">VANTEX Hub — Company Portal</span><span class="window-controls"><button class="classic-button minimize" aria-label="Minimize">_</button><button class="classic-button maximize" aria-label="Maximize">□</button><button class="classic-button close" aria-label="Close">×</button></span></header>
+      <div class="window-body vantex-body" id="vantexApp">
+        <header class="vx-brandbar"><div class="vx-brand"><span class="vx-mark">V</span><div class="vx-wordmark">VANTEX<small>TECHNOLOGY STUDIO</small></div></div><span class="vx-portal-tag">COMPANY PORTAL</span></header>
+        <nav class="vx-tabs" role="tablist" aria-label="VANTEX sections">
+          <button class="vx-tab active" type="button" role="tab" aria-selected="true" data-vx-tab="overview">Overview</button>
+          <button class="vx-tab" type="button" role="tab" aria-selected="false" data-vx-tab="solutions">Solutions</button>
+          <button class="vx-tab" type="button" role="tab" aria-selected="false" data-vx-tab="about">About</button>
+          <button class="vx-tab" type="button" role="tab" aria-selected="false" data-vx-tab="workload">Workload</button>
+          <button class="vx-tab" type="button" role="tab" aria-selected="false" data-vx-tab="contact">Contact</button>
+        </nav>
+        <section class="vx-view" id="vx-overview" role="tabpanel">
+          <div class="vx-hero"><span class="vx-eyebrow">INDEPENDENT TECHNOLOGY STUDIO</span><h1>Build what’s next.</h1><p>VANTEX brings thoughtful software and connected tools together—making everyday technology feel a little more human.</p><button class="vx-action" type="button" data-vx-go="solutions">Explore our solutions&nbsp; →</button></div>
+          <div class="vx-stats"><div class="vx-stat"><strong>03</strong><span>CONCEPT SOLUTIONS</span></div><div class="vx-stat"><strong>LOCAL</strong><span>PROTOTYPE MODE</span></div><div class="vx-stat"><strong>1987</strong><span>DESIGN EDITION</span></div></div>
+          <h2 class="vx-section-heading">What we’re building</h2>
+          <div class="vx-card-grid"><article class="vx-card"><span class="vx-card-icon">◉</span><h3>Privacy-first tools</h3><p>Useful experiences with clear control over your data.</p></article><article class="vx-card"><span class="vx-card-icon">⌘</span><h3>Connected by design</h3><p>Simple workflows across the devices you use.</p></article><article class="vx-card"><span class="vx-card-icon">✳</span><h3>Human technology</h3><p>Less friction, more focus on the things that matter.</p></article></div>
+        </section>
+        <section class="vx-view" id="vx-solutions" role="tabpanel" hidden>
+          <span class="vx-eyebrow">THE VANTEX TOOLKIT</span><h1 class="vx-page-title">Solutions, made useful.</h1><p class="vx-muted">A small collection of thoughtful digital tools from the VANTEX studio.</p>
+          <div class="vx-product-list"><article class="vx-product"><span class="vx-card-icon">📹</span><div><h3>Cybercam</h3><p>A local-first camera studio for quick photos and recordings. Your camera stays under your control.</p></div></article><article class="vx-product"><span class="vx-card-icon">◈</span><div><h3>VANTEX Edge</h3><p>A concept dashboard for keeping your connected devices organized and easy to understand.</p></div></article><article class="vx-product"><span class="vx-card-icon">✦</span><div><h3>VANTEX Studio</h3><p>A focused workspace concept for bringing projects, notes, and people together.</p></div></article></div>
+        </section>
+        <section class="vx-view" id="vx-about" role="tabpanel" hidden>
+          <span class="vx-eyebrow">A NOTE FROM THE STUDIO</span><h1 class="vx-page-title">Technology should work for people.</h1><p class="vx-muted">VANTEX is a company concept built around a straightforward idea: software can be powerful without feeling complicated. We design clear, considered tools that put people first.</p><div class="vx-card-grid"><article class="vx-card"><span class="vx-card-icon">01</span><h3>Clarity</h3><p>Make the important things easy to find.</p></article><article class="vx-card"><span class="vx-card-icon">02</span><h3>Care</h3><p>Respect people’s time, privacy, and attention.</p></article><article class="vx-card"><span class="vx-card-icon">03</span><h3>Curiosity</h3><p>Keep exploring better ways to make things.</p></article></div>
+        </section>
+        <section class="vx-view" id="vx-workload" role="tabpanel" hidden>
+          <span class="vx-eyebrow">TODAY’S ASSIGNMENT</span><h1 class="vx-page-title">Workload</h1>
+          <div class="vx-workload-card"><span class="vx-eyebrow">MONITORING REVIEW · CYBERCHECK</span><span class="vx-task-state" id="workloadTaskState">TASK IN PROGRESS</span><h2>Check the site camera images</h2><p>Review each supplied camera image and mark the location <b>Safe</b> or <b>Entity Active</b>. Open Cybercheck to choose a camera and record your review.</p><button class="vx-action" type="button" data-open="cybercheck">Open Cybercheck&nbsp; →</button></div>
+          <div class="vx-workload-heading"><h3>Camera review status</h3><span class="vx-workload-count" id="workloadProgress">0 / 5 reviewed</span></div>
+          <div class="vx-workload-list" id="workloadCameraList"></div>
+          <p class="vx-no-tasks" id="workloadNoTasks">✓ Workload submitted. No other tasks right now.</p>
+          <p class="vx-muted" style="font-size:10px">Review is manual and uses static demo images; Cybercheck does not detect entities automatically or connect to live cameras.</p>
+        </section>
+        <section class="vx-view" id="vx-contact" role="tabpanel" hidden>
+          <span class="vx-eyebrow">LET’S START A CONVERSATION</span><h1 class="vx-page-title">Talk to VANTEX.</h1><p class="vx-muted">Share what you’re working on and the studio will be in touch.</p>
+          <form class="vx-contact-form" id="vantexContactForm"><label>Your name<input name="name" autocomplete="name" required placeholder="Jane Smith"></label><label>Email address<input name="email" type="email" autocomplete="email" required placeholder="jane@example.com"></label><label>What can we help with?<textarea name="message" required placeholder="Tell us a little about your project..."></textarea></label><button class="vx-action" type="submit">Send inquiry&nbsp; →</button><p class="vx-form-status" id="vantexFormStatus" aria-live="polite"></p></form>
+        </section>
+        <footer class="vx-footer"><span>© 2026 VANTEX · COMPANY CONCEPT</span><span>VANTEX HUB · DEMO BUILD</span></footer>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="start-menu" id="startMenu" aria-label="Start menu">
+    <div class="start-rail"><span>Windowz</span>&nbsp;64</div>
+    <div class="start-list">
+      <button class="menu-entry" data-open="programs"><span class="menu-glyph">🧩</span><span><b>Programs</b><br><small>All your stuff</small></span></button>
+      <button class="menu-entry" data-open="vantex"><span class="menu-glyph">🟣</span><span><b>VANTEX Hub</b><br><small>Company portal</small></span></button>
+      <button class="menu-entry" data-open="cybercam"><span class="menu-glyph">📹</span><span><b>Cybercam</b><br><small>Camera studio</small></span></button>
+      <button class="menu-entry" data-open="cybercheck"><span class="menu-glyph">🛡️</span><span><b>Cybercheck</b><br><small>Camera review</small></span></button>
+      <button class="menu-entry" data-open="files"><span class="menu-glyph">📁</span><span><b>Documents</b><br><small>Recent files</small></span></button>
+      <button class="menu-entry" data-open="settings"><span class="menu-glyph">⚙️</span><span><b>Settings</b><br><small>Make it yours</small></span></button>
+      <button class="menu-entry" data-open="network"><span class="menu-glyph">🌐</span><span><b>Search</b><br><small>Explore the web</small></span></button>
+      <hr class="menu-rule">
+      <button class="menu-entry" id="shutdownButton"><span class="menu-glyph">⏻</span><span><b>Shut Down...</b><br><small>That's all, folks</small></span></button>
+    </div>
+  </nav>
+
+  <div class="context-menu" id="contextMenu">
+    <button data-action="arrange">Arrange Icons</button><button data-action="refresh">Refresh</button><hr>
+    <button data-action="settings">Properties...</button>
+  </div>
+
+  <footer class="taskbar">
+    <button class="classic-button start-button" id="startButton"><span class="mini-logo"><i></i><i></i><i></i><i></i></span>Start</button>
+    <span class="task-divider"></span>
+    <div class="task-items" id="taskItems"></div>
+    <div class="tray"><button class="speaker-toggle" id="soundToggle" type="button" aria-label="Mute retro click sounds" title="Toggle retro click sounds">🔊</button><span id="clock">12:00 PM</span></div>
+  </footer>
+
+  <div class="shutdown-screen" id="shutdownScreen"><div>It is now safe to turn off your computer.<br><button class="classic-button" id="restartButton">Restart Windowz 64</button></div></div>
+
+  <script>
+    const bootScreen = document.getElementById('bootScreen');
+    const bootHint = document.getElementById('bootHint');
+    const gameIntro = document.getElementById('gameIntro');
+    const startButton = document.getElementById('startButton');
+    const startMenu = document.getElementById('startMenu');
+    const contextMenu = document.getElementById('contextMenu');
+    const taskItems = document.getElementById('taskItems');
+    let topZ = 30;
+    let systemAudioContext = null;
+    let systemSoundsEnabled = true;
+    let cameraStream = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+
+    function playRetroClick() {
+      if (!systemSoundsEnabled) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      try {
+        systemAudioContext ||= new AudioContextClass();
+        if (systemAudioContext.state === 'suspended') systemAudioContext.resume();
+        const duration = 0.022;
+        const frameCount = Math.floor(systemAudioContext.sampleRate * duration);
+        const buffer = systemAudioContext.createBuffer(1, frameCount, systemAudioContext.sampleRate);
+        const samples = buffer.getChannelData(0);
+        for (let i = 0; i < frameCount; i += 1) {
+          const fade = 1 - i / frameCount;
+          samples[i] = (Math.random() * 2 - 1) * fade * fade;
+        }
+        const source = systemAudioContext.createBufferSource();
+        const filter = systemAudioContext.createBiquadFilter();
+        const volume = systemAudioContext.createGain();
+        source.buffer = buffer;
+        filter.type = 'highpass';
+        filter.frequency.value = 1350;
+        volume.gain.setValueAtTime(0.07, systemAudioContext.currentTime);
+        volume.gain.exponentialRampToValueAtTime(0.0001, systemAudioContext.currentTime + duration);
+        source.connect(filter);
+        filter.connect(volume);
+        volume.connect(systemAudioContext.destination);
+        source.start();
+      } catch {
+        // Keep the desktop usable when system audio is unavailable.
+      }
+    }
+    document.addEventListener('click', (event) => {
+      if (event.target.closest('button, .desktop-icon, .titlebar, [role="button"]')) playRetroClick();
+    }, true);
+    document.getElementById('soundToggle').addEventListener('click', (event) => {
+      systemSoundsEnabled = !systemSoundsEnabled;
+      event.currentTarget.textContent = systemSoundsEnabled ? '🔊' : '🔇';
+      event.currentTarget.setAttribute('aria-label', systemSoundsEnabled ? 'Mute retro click sounds' : 'Enable retro click sounds');
+    });
+
+    let bootTimer = null;
+    let bootTimeout = null;
+    function runBootSequence(message = 'Starting your computer...') {
+      const bootMessages = ['Checking system configuration...', 'Loading retro drivers...', 'Warming up the hard disk...', 'Welcome back.'];
+      let bootIndex = 0;
+      if (bootTimer) clearInterval(bootTimer);
+      if (bootTimeout) clearTimeout(bootTimeout);
+      gameIntro.classList.remove('show');
+      gameIntro.setAttribute('aria-hidden', 'true');
+      bootScreen.classList.remove('done');
+      bootHint.textContent = message;
+      const progressFill = document.querySelector('.progress-fill');
+      progressFill.style.animation = 'none';
+      void progressFill.offsetWidth;
+      progressFill.style.animation = '';
+      bootTimer = setInterval(() => {
+        bootHint.textContent = bootMessages[Math.min(bootIndex++, bootMessages.length - 1)];
+      }, 620);
+      bootTimeout = setTimeout(() => {
+        clearInterval(bootTimer);
+        bootScreen.classList.add('done');
+        gameIntro.classList.add('show');
+        gameIntro.setAttribute('aria-hidden', 'false');
+      }, 3300);
+    }
+    runBootSequence();
+    function beginShift() {
+      gameIntro.classList.remove('show');
+      gameIntro.setAttribute('aria-hidden', 'true');
+      openWindow('vantex');
+      showVantexTab('workload');
+    }
+    document.getElementById('beginShiftButton').addEventListener('click', beginShift);
+    document.addEventListener('keydown', (event) => {
+      if (gameIntro.classList.contains('show') && (event.key === 'Enter' || event.key === ' ')) {
+        event.preventDefault();
+        beginShift();
+      }
+    });
+
+    function getWindow(name) { return document.getElementById(`window-${name}`); }
+    function raise(win) {
+      topZ += 1;
+      win.style.zIndex = topZ;
+      document.querySelectorAll('.task-item').forEach((button) => button.classList.toggle('pressed', button.dataset.window === win.id && !win.classList.contains('hidden')));
+    }
+    function openWindow(name) {
+      const win = getWindow(name);
+      if (!win) return;
+      win.classList.remove('hidden');
+      raise(win);
+      startMenu.classList.remove('open');
+      startButton.classList.remove('pressed');
+      let task = document.querySelector(`.task-item[data-window="${win.id}"]`);
+      if (!task) {
+        task = document.createElement('button');
+        task.className = 'classic-button task-item pressed';
+        task.dataset.window = win.id;
+        task.textContent = win.dataset.title;
+        task.addEventListener('click', () => {
+          if (!win.classList.contains('hidden') && task.classList.contains('pressed')) {
+            win.classList.add('hidden');
+            task.classList.remove('pressed');
+          } else {
+            win.classList.remove('hidden');
+            raise(win);
+          }
+        });
+        taskItems.appendChild(task);
+      }
+      task.classList.add('pressed');
+    }
+    function closeWindow(win) {
+      if (win.id === 'window-cybercam') stopCamera();
+      win.classList.add('hidden');
+      const task = document.querySelector(`.task-item[data-window="${win.id}"]`);
+      if (task) task.remove();
+    }
+
+    document.querySelectorAll('[data-open]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const name = button.dataset.open;
+        if (name === 'programs') openWindow('computer');
+        else openWindow(name);
+      });
+      button.addEventListener('dblclick', () => openWindow(button.dataset.open));
+    });
+    document.querySelectorAll('.desktop-icon').forEach((icon) => icon.addEventListener('click', () => {
+      document.querySelectorAll('.desktop-icon').forEach((item) => item.classList.remove('selected'));
+      icon.classList.add('selected');
+    }));
+
+    startButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const isOpen = startMenu.classList.toggle('open');
+      startButton.classList.toggle('pressed', isOpen);
+      contextMenu.classList.remove('open');
+    });
+    document.addEventListener('click', (event) => {
+      if (!startMenu.contains(event.target) && !startButton.contains(event.target)) {
+        startMenu.classList.remove('open');
+        startButton.classList.remove('pressed');
+      }
+      if (!contextMenu.contains(event.target)) contextMenu.classList.remove('open');
+    });
+
+    document.querySelectorAll('.window').forEach((win) => {
+      win.addEventListener('pointerdown', () => raise(win));
+      win.querySelector('.close').addEventListener('click', () => closeWindow(win));
+      win.querySelector('.minimize').addEventListener('click', () => {
+        win.classList.add('hidden');
+        const task = document.querySelector(`.task-item[data-window="${win.id}"]`);
+        if (task) task.classList.remove('pressed');
+      });
+      win.querySelector('.maximize').addEventListener('click', () => win.classList.toggle('maximized'));
+      const bar = win.querySelector('.titlebar');
+      bar.addEventListener('pointerdown', (event) => {
+        if (event.target.closest('button') || win.classList.contains('maximized')) return;
+        const rect = win.getBoundingClientRect();
+        const offsetX = event.clientX - rect.left;
+        const offsetY = event.clientY - rect.top;
+        bar.setPointerCapture(event.pointerId);
+        const move = (moveEvent) => {
+          win.style.left = `${Math.max(0, Math.min(window.innerWidth - 80, moveEvent.clientX - offsetX))}px`;
+          win.style.top = `${Math.max(0, Math.min(window.innerHeight - 80, moveEvent.clientY - offsetY))}px`;
+        };
+        const stop = () => {
+          bar.removeEventListener('pointermove', move);
+          bar.removeEventListener('pointerup', stop);
+        };
+        bar.addEventListener('pointermove', move);
+        bar.addEventListener('pointerup', stop);
+      });
+    });
+
+    document.getElementById('wallpaper').addEventListener('change', (event) => {
+      document.querySelector('.desktop').style.backgroundColor = event.target.value;
+    });
+    document.querySelector('.close-settings').addEventListener('click', () => closeWindow(getWindow('settings')));
+    const searchInput = document.getElementById('searchInput');
+    const searchResults = document.getElementById('searchResults');
+    const searchMessage = document.getElementById('searchMessage');
+    const searchVantexSite = document.getElementById('searchVantexSite');
+    const localSearchIndex = [
+      { title: 'VANTEX Secrets — Website Preview', path: 'search.local/vantex/secrets', description: 'A placeholder website page for VANTEX. The contents will be decided later.', keywords: 'vantex secrets secerets secret website page hidden', app: 'vantex-secrets' },
+      { title: 'VANTEX Hub', path: 'search.local/company/vantex', description: 'Explore VANTEX, its technology studio, and the tools it is building.', keywords: 'company portal technology studio edge workspace', app: 'vantex' },
+      { title: 'Cybercam', path: 'search.local/apps/cybercam', description: 'Open the local camera studio for photos, video, and retro-inspired filters.', keywords: 'camera webcam photo video recording', app: 'cybercam' },
+      { title: 'My Computer', path: 'search.local/system/computer', description: 'Browse your drives and learn more about this Windowz 64 desktop.', keywords: 'computer system drives disk windowz windows', app: 'computer' },
+      { title: 'Read Me', path: 'search.local/help/readme', description: 'Tips for using this retro desktop and its built-in applications.', keywords: 'help guide instructions desktop retro', app: 'readme' }
+    ];
+    function showVantexSite() {
+      document.querySelector('.search-topline').hidden = true;
+      document.querySelector('.search-center').hidden = true;
+      searchResults.hidden = true;
+      document.querySelector('.search-footer').hidden = true;
+      searchVantexSite.hidden = false;
+    }
+    function returnToSearchResults() {
+      document.querySelector('.search-topline').hidden = false;
+      document.querySelector('.search-center').hidden = false;
+      searchResults.hidden = false;
+      document.querySelector('.search-footer').hidden = false;
+      searchVantexSite.hidden = true;
+    }
+    function openSearchResult(item) {
+      if (item.app === 'vantex-secrets') showVantexSite();
+      else openWindow(item.app);
+    }
+    function performSearch(query) {
+      const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+      searchResults.replaceChildren();
+      if (!terms.length) {
+        searchResults.hidden = true;
+        searchMessage.textContent = 'Type something in the search box to begin.';
+        return [];
+      }
+      const matches = localSearchIndex.filter((item) => {
+        const searchableText = `${item.title} ${item.description} ${item.keywords}`.toLowerCase();
+        return terms.every((term) => searchableText.includes(term));
+      });
+      searchMessage.textContent = `Search results for “${query.trim()}”`;
+      searchResults.hidden = false;
+      const heading = document.createElement('div');
+      heading.className = 'search-results-heading';
+      heading.textContent = matches.length ? `${matches.length} local demo ${matches.length === 1 ? 'result' : 'results'} · no live web connection` : 'No local demo results · no live web connection';
+      searchResults.appendChild(heading);
+      if (!matches.length) {
+        const empty = document.createElement('p');
+        empty.className = 'search-no-results';
+        empty.textContent = 'Try searching for VANTEX, Cybercam, computer, or help.';
+        searchResults.appendChild(empty);
+        return matches;
+      }
+      matches.forEach((item) => {
+        const result = document.createElement('article');
+        result.className = 'search-result';
+        const link = document.createElement('button');
+        link.type = 'button';
+        link.className = 'search-result-link';
+        link.textContent = item.title;
+        link.addEventListener('click', () => openSearchResult(item));
+        const url = document.createElement('div');
+        url.className = 'search-result-url';
+        url.textContent = item.path;
+        const description = document.createElement('p');
+        description.textContent = item.description;
+        result.append(link, url, description);
+        searchResults.appendChild(result);
+      });
+      return matches;
+    }
+    document.getElementById('webSearchForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      performSearch(searchInput.value);
+    });
+    document.getElementById('luckySearch').addEventListener('click', () => {
+      const matches = performSearch(searchInput.value);
+      if (matches.length) openSearchResult(matches[0]);
+    });
+    document.getElementById('vantexSiteBack').addEventListener('click', returnToSearchResults);
+    document.querySelectorAll('[data-search-query]').forEach((button) => {
+      button.addEventListener('click', () => {
+        searchInput.value = button.dataset.searchQuery;
+        performSearch(searchInput.value);
+        searchInput.focus();
+      });
+    });
+
+    const cybercamVideo = document.getElementById('cybercamVideo');
+    const cybercamPreview = document.getElementById('cybercamPreview');
+    const cameraStatus = document.getElementById('cameraStatus');
+    const cameraResolution = document.getElementById('cameraResolution');
+    const cameraToggle = document.getElementById('cameraToggle');
+    const captureButton = document.getElementById('captureButton');
+    const recordButton = document.getElementById('recordButton');
+    const monitorModeTab = document.getElementById('monitorModeTab');
+    const webcamModeTab = document.getElementById('webcamModeTab');
+    const cybercamMonitorMode = document.getElementById('cybercamMonitorMode');
+    const cybercamWebcamMode = document.getElementById('cybercamWebcamMode');
+    function setCybercamMode(mode) {
+      const showMonitor = mode === 'monitor';
+      cybercamMonitorMode.hidden = !showMonitor;
+      cybercamWebcamMode.hidden = showMonitor;
+      monitorModeTab.classList.toggle('active', showMonitor);
+      monitorModeTab.setAttribute('aria-selected', String(showMonitor));
+      webcamModeTab.classList.toggle('active', !showMonitor);
+      webcamModeTab.setAttribute('aria-selected', String(!showMonitor));
+      if (showMonitor && cameraStream) stopCamera();
+    }
+    monitorModeTab.addEventListener('click', () => setCybercamMode('monitor'));
+    webcamModeTab.addEventListener('click', () => setCybercamMode('webcam'));
+    const monitorFocusImage = document.getElementById('monitorFocusImage');
+    const monitorFocusName = document.getElementById('monitorFocusName');
+    const monitorFocusTime = document.getElementById('monitorFocusTime');
+    document.querySelectorAll('.monitor-feed').forEach((feed) => {
+      feed.addEventListener('click', () => {
+        document.querySelectorAll('.monitor-feed').forEach((item) => item.classList.toggle('active', item === feed));
+        monitorFocusImage.src = feed.dataset.cameraImage;
+        monitorFocusImage.alt = `${feed.dataset.cameraName.replace('CAM ', 'Camera ')} still image`;
+        monitorFocusName.textContent = feed.dataset.cameraName;
+      });
+    });
+    function updateMonitorTime() {
+      monitorFocusTime.textContent = new Intl.DateTimeFormat([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }).format(new Date());
+    }
+    updateMonitorTime();
+    setInterval(updateMonitorTime, 1000);
+    function setCameraStatus(message, state = '') {
+      cameraStatus.textContent = message;
+      cameraStatus.className = `camera-status ${state}`;
+    }
+    function downloadBlob(blob, filename) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    async function startCamera() {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setCameraStatus('CAMERA NEEDS A SECURE CONNECTION', 'error');
+        return;
+      }
+      cameraToggle.disabled = true;
+      setCameraStatus('REQUESTING CAMERA ACCESS...');
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+        cybercamVideo.srcObject = cameraStream;
+        await cybercamVideo.play();
+        cybercamPreview.classList.add('live');
+        cameraToggle.textContent = 'Stop camera';
+        captureButton.disabled = false;
+        recordButton.disabled = typeof MediaRecorder === 'undefined';
+        cameraResolution.textContent = `${cybercamVideo.videoWidth} × ${cybercamVideo.videoHeight}`;
+        setCameraStatus('CAMERA ONLINE · PRIVATE SESSION');
+      } catch (error) {
+        cameraStream = null;
+        const message = error.name === 'NotAllowedError' ? 'ACCESS DENIED · ALLOW CAMERA IN BROWSER' : 'CAMERA NOT FOUND · CHECK DEVICE';
+        setCameraStatus(message, 'error');
+      } finally {
+        cameraToggle.disabled = false;
+      }
+    }
+    function stopCamera() {
+      if (mediaRecorder?.state === 'recording') mediaRecorder.stop();
+      if (cameraStream) cameraStream.getTracks().forEach((track) => track.stop());
+      cameraStream = null;
+      cybercamVideo.srcObject = null;
+      cybercamPreview.classList.remove('live');
+      cameraToggle.textContent = 'Start camera';
+      captureButton.disabled = true;
+      recordButton.disabled = true;
+      recordButton.textContent = '● Record';
+      recordButton.classList.remove('recording');
+      cameraResolution.textContent = 'NO SIGNAL';
+      setCameraStatus('CAMERA OFFLINE');
+    }
+    cameraToggle.addEventListener('click', () => cameraStream ? stopCamera() : startCamera());
+    document.getElementById('cameraFilter').addEventListener('change', (event) => {
+      cybercamVideo.style.filter = event.target.value;
+    });
+    captureButton.addEventListener('click', () => {
+      if (!cameraStream || !cybercamVideo.videoWidth) return;
+      const canvas = document.createElement('canvas');
+      canvas.width = cybercamVideo.videoWidth;
+      canvas.height = cybercamVideo.videoHeight;
+      const context = canvas.getContext('2d');
+      context.filter = getComputedStyle(cybercamVideo).filter;
+      context.drawImage(cybercamVideo, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob((blob) => {
+        if (blob) downloadBlob(blob, `cybercam-${Date.now()}.png`);
+      }, 'image/png');
+      setCameraStatus('PHOTO CAPTURED · SAVING LOCALLY');
+    });
+    recordButton.addEventListener('click', () => {
+      if (!cameraStream) return;
+      if (mediaRecorder?.state === 'recording') {
+        mediaRecorder.stop();
+        return;
+      }
+      const mimeType = ['video/webm;codecs=vp9', 'video/webm;codecs=vp8', 'video/webm'].find((type) => MediaRecorder.isTypeSupported(type));
+      recordedChunks = [];
+      mediaRecorder = new MediaRecorder(cameraStream, mimeType ? { mimeType } : undefined);
+      mediaRecorder.addEventListener('dataavailable', (event) => {
+        if (event.data.size) recordedChunks.push(event.data);
+      });
+      mediaRecorder.addEventListener('stop', () => {
+        if (recordedChunks.length) {
+          const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType || 'video/webm' });
+          downloadBlob(blob, `cybercam-${Date.now()}.webm`);
+          setCameraStatus('RECORDING SAVED · LOCAL DOWNLOAD');
+        }
+        recordButton.textContent = '● Record';
+        recordButton.classList.remove('recording');
+      }, { once: true });
+      mediaRecorder.start();
+      recordButton.textContent = '■ Stop recording';
+      recordButton.classList.add('recording');
+      setCameraStatus('RECORDING · THIS DEVICE ONLY', 'recording');
+    });
+    window.addEventListener('beforeunload', () => cameraStream?.getTracks().forEach((track) => track.stop()));
+
+    const reviewCameras = [
+      { name: 'CAM 01 · RECEPTION', shortName: '01 · Reception', image: 'img/reception.jpg', alt: 'Reception still image' },
+      { name: 'CAM 02 · EXTERIOR', shortName: '02 · Exterior', image: 'img/Outside.jpg', alt: 'Exterior still image' },
+      { name: 'CAM 03 · KITCHEN', shortName: '03 · Kitchen', image: 'img/kitchen.jpg', alt: 'Kitchen still image' },
+      { name: 'CAM 04 · HALLWAY', shortName: '04 · Hallway', image: 'img/hall.jpg', alt: 'Hallway still image' },
+      { name: 'CAM 05 · OFFICE FLOOR', shortName: '05 · Office floor', image: 'img/desk.jpg', alt: 'Office floor still image' }
+    ];
+    const reviewStorageKey = 'oldpc-cybercheck-review-v1';
+    let storedReview = null;
+    try {
+      storedReview = JSON.parse(localStorage.getItem(reviewStorageKey) || 'null');
+    } catch {
+      storedReview = null;
+    }
+    const cameraReviewStates = reviewCameras.map((_, index) => ['safe', 'active'].includes(storedReview?.states?.[index]) ? storedReview.states[index] : null);
+    const cameraReviewLog = Array.isArray(storedReview?.log) ? storedReview.log.filter((entry) => typeof entry === 'string').slice(-30) : [];
+    let selectedReviewCamera = 0;
+    let cameraJobSubmitted = Boolean(storedReview?.submitted && cameraReviewStates.every(Boolean));
+    function getReviewLabel(state) {
+      if (state === 'safe') return 'SAFE · NO ENTITY';
+      if (state === 'active') return 'ACTIVE · ENTITY PRESENT';
+      return 'UNREVIEWED';
+    }
+    function renderCybercheckStatus() {
+      const camera = reviewCameras[selectedReviewCamera];
+      const state = cameraReviewStates[selectedReviewCamera];
+      document.getElementById('cybercheckImage').src = camera.image;
+      document.getElementById('cybercheckImage').alt = camera.alt;
+      document.getElementById('cybercheckCameraName').textContent = camera.name;
+      const currentStatus = document.getElementById('cybercheckCurrentStatus');
+      currentStatus.textContent = `REVIEW STATUS: ${getReviewLabel(state)}`;
+      currentStatus.className = `cybercheck-current-status ${state || ''}`;
+      document.querySelectorAll('.cybercheck-camera').forEach((button, index) => {
+        button.classList.toggle('selected', index === selectedReviewCamera);
+        button.disabled = cameraJobSubmitted;
+        const status = button.querySelector('.cybercheck-camera-state');
+        status.textContent = getReviewLabel(cameraReviewStates[index]);
+        status.className = `cybercheck-camera-state ${cameraReviewStates[index] || ''}`;
+      });
+      const reviewed = cameraReviewStates.filter(Boolean).length;
+      document.getElementById('workloadProgress').textContent = `${reviewed} / ${reviewCameras.length} reviewed${cameraJobSubmitted ? ' · submitted' : ''}`;
+      document.getElementById('markSafeButton').disabled = cameraJobSubmitted;
+      document.getElementById('markActiveButton').disabled = cameraJobSubmitted;
+      const sendResultsButton = document.getElementById('sendResultsButton');
+      sendResultsButton.disabled = reviewed !== reviewCameras.length || cameraJobSubmitted;
+      sendResultsButton.textContent = cameraJobSubmitted ? 'Demo submitted' : 'Send to server';
+      const submitStatus = document.getElementById('cybercheckSubmitStatus');
+      submitStatus.textContent = cameraJobSubmitted
+        ? 'Demo submission recorded locally—not sent to a server.'
+        : reviewed === reviewCameras.length
+          ? 'All cameras reviewed. Ready to submit.'
+          : `Review all ${reviewCameras.length} cameras to enable submission.`;
+      submitStatus.classList.toggle('complete', cameraJobSubmitted);
+      const workloadTaskState = document.getElementById('workloadTaskState');
+      workloadTaskState.textContent = cameraJobSubmitted ? 'TASK COMPLETE · DEMO SUBMITTED' : 'TASK IN PROGRESS';
+      workloadTaskState.classList.toggle('complete', cameraJobSubmitted);
+      document.getElementById('workloadNoTasks').classList.toggle('show', cameraJobSubmitted);
+      const workloadList = document.getElementById('workloadCameraList');
+      workloadList.replaceChildren();
+      reviewCameras.forEach((entry, index) => {
+        const row = document.createElement('div');
+        row.className = 'vx-workload-row';
+        const location = document.createElement('span');
+        location.textContent = entry.shortName;
+        const status = document.createElement('span');
+        status.className = `vx-workload-state ${cameraReviewStates[index] || ''}`;
+        status.textContent = getReviewLabel(cameraReviewStates[index]);
+        row.append(location, status);
+        workloadList.appendChild(row);
+      });
+      const log = document.getElementById('cybercheckLog');
+      log.textContent = cameraReviewLog.length ? cameraReviewLog.slice(-5).reverse().join('\n') : 'Review log ready. Select a camera image and mark its status.';
+      try {
+        localStorage.setItem(reviewStorageKey, JSON.stringify({ states: cameraReviewStates, log: cameraReviewLog.slice(-30), submitted: cameraJobSubmitted }));
+      } catch {
+        // Review still works when browser storage is unavailable.
+      }
+    }
+    document.querySelectorAll('.cybercheck-camera').forEach((button) => {
+      button.addEventListener('click', () => {
+        selectedReviewCamera = Number(button.dataset.cameraIndex);
+        renderCybercheckStatus();
+      });
+    });
+    function recordCameraReview(state) {
+      cameraReviewStates[selectedReviewCamera] = state;
+      const time = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }).format(new Date());
+      cameraReviewLog.push(`${time} · ${reviewCameras[selectedReviewCamera].name} · ${getReviewLabel(state)}`);
+      renderCybercheckStatus();
+    }
+    document.getElementById('markSafeButton').addEventListener('click', () => recordCameraReview('safe'));
+    document.getElementById('markActiveButton').addEventListener('click', () => recordCameraReview('active'));
+    document.getElementById('sendResultsButton').addEventListener('click', () => {
+      if (cameraReviewStates.some((state) => !state) || cameraJobSubmitted) return;
+      cameraJobSubmitted = true;
+      const time = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit', second: '2-digit' }).format(new Date());
+      cameraReviewLog.push(`${time} · JOB SUBMITTED · LOCAL DEMO ONLY`);
+      renderCybercheckStatus();
+    });
+    renderCybercheckStatus();
+
+    function showVantexTab(tabName) {
+      document.querySelectorAll('.vx-tab').forEach((tab) => {
+        const active = tab.dataset.vxTab === tabName;
+        tab.classList.toggle('active', active);
+        tab.setAttribute('aria-selected', String(active));
+      });
+      document.querySelectorAll('.vx-view').forEach((view) => {
+        view.hidden = view.id !== `vx-${tabName}`;
+      });
+    }
+    document.querySelectorAll('.vx-tab').forEach((tab) => {
+      tab.addEventListener('click', () => showVantexTab(tab.dataset.vxTab));
+    });
+    document.querySelectorAll('[data-vx-go]').forEach((button) => {
+      button.addEventListener('click', () => showVantexTab(button.dataset.vxGo));
+    });
+    document.getElementById('vantexContactForm').addEventListener('submit', (event) => {
+      event.preventDefault();
+      document.getElementById('vantexFormStatus').textContent = 'Thanks for reaching out. This demo does not send or store inquiries.';
+      event.currentTarget.reset();
+    });
+
+    document.getElementById('shutdownButton').addEventListener('click', () => {
+      startMenu.classList.remove('open');
+      document.getElementById('shutdownScreen').classList.add('show');
+    });
+    document.getElementById('restartButton').addEventListener('click', () => {
+      document.getElementById('shutdownScreen').classList.remove('show');
+      runBootSequence('Restarting your computer...');
+    });
+
+    document.getElementById('desktop').addEventListener('contextmenu', (event) => {
+      if (event.target.closest('.window')) return;
+      event.preventDefault();
+      contextMenu.style.left = `${Math.min(event.clientX, window.innerWidth - 180)}px`;
+      contextMenu.style.top = `${Math.min(event.clientY, window.innerHeight - 120)}px`;
+      contextMenu.classList.add('open');
+    });
+    contextMenu.addEventListener('click', (event) => {
+      const action = event.target.dataset.action;
+      if (action === 'settings') openWindow('settings');
+      if (action === 'refresh') {
+        document.querySelectorAll('.desktop-icon').forEach((icon) => {
+          icon.animate([{ opacity: .35 }, { opacity: 1 }], { duration: 250 });
+        });
+      }
+      if (action === 'arrange') {
+        document.querySelector('.desktop-icons').style.gap = '10px 2px';
+      }
+      contextMenu.classList.remove('open');
+    });
+
+    function updateClock() {
+      document.getElementById('clock').textContent = new Intl.DateTimeFormat([], { hour: 'numeric', minute: '2-digit' }).format(new Date());
+    }
+    updateClock();
+    setInterval(updateClock, 15000);
+  </script>
+</body>
+</html>
